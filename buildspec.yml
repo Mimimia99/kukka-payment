@@ -19,7 +19,7 @@ phases:
       - echo $AWS_DEFAULT_REGION
       - echo $CODEBUILD_RESOLVED_SOURCE_VERSION
       - echo start command
-      - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+      - docker login --username AWS -p $(aws ecr get-login-password --region $AWS_DEFAULT_REGION) $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
   build:
     commands:
       - echo Build started on `date`
@@ -40,44 +40,39 @@ phases:
           apiVersion: v1
           kind: Service
           metadata:
-            name: $_PROJECT_NAME
+            name: payment
             labels:
-              app: $_PROJECT_NAME
+              app: payment
           spec:
             ports:
               - port: 8080
                 targetPort: 8080
             selector:
-              app: $_PROJECT_NAME
+              app: payment
           EOF
       - |
-          cat  <<EOF | kubectl apply -f -
+          cat <<EOF | kubectl apply -f -
           apiVersion: apps/v1
           kind: Deployment
           metadata:
-            name: $_PROJECT_NAME
+            name: payment
             labels:
-              app: $_PROJECT_NAME
+              app: payment
           spec:
             replicas: 1
             selector:
               matchLabels:
-                app: $_PROJECT_NAME
+                app: payment
             template:
               metadata:
                 labels:
-                  app: $_PROJECT_NAME
+                  app: payment
               spec:
                 containers:
-                  - name: $_PROJECT_NAME
+                  - name: payment
                     image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$_PROJECT_NAME:$CODEBUILD_RESOLVED_SOURCE_VERSION
                     ports:
-                      - containerPort: 8080
-                    resources:
-                      limits:
-                        cpu: 500m
-                      requests:
-                        cpu: 200m
+                      - containerPort: 8080 
                     readinessProbe:
                       httpGet:
                         path: /actuator/health
@@ -97,4 +92,4 @@ phases:
           EOF
 cache:
   paths:
-    - '/root/.m2/**/*'
+    - '/root/.m2/**/
