@@ -27,7 +27,12 @@ public class Payment {
             System.out.println("payment $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" + paymentConfirmed.getStatus());
             paymentConfirmed.setStatus("PaymentConfirmed");
             paymentConfirmed.publishAfterCommit();
-
+            
+            try {
+                Thread.currentThread().sleep((long) (200 + Math.random() * 110));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         } else if (this.getStatus().equals("PaymentCancelled")) {
             System.out.println("$$$$$$$$$$$$$$$$$$$ PaymentCancelled $$$$$$$$$$$$$$$$$$$$$$$$$");
             System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" + this.getOrderId());
