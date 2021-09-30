@@ -5,7 +5,11 @@ env:
     _PROJECT_NAME: "user03-payment"
 
 phases:
-  commands:
+  install:
+    runtime-versions:
+      java: openjdk8
+      docker: 18
+    commands:
       - echo install kubectl
       - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
       - chmod +x ./kubectl
@@ -72,6 +76,11 @@ phases:
                     image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$_PROJECT_NAME:$CODEBUILD_RESOLVED_SOURCE_VERSION
                     ports:
                       - containerPort: 8080
+                    resources:
+                      limits:
+                        cpu: 500m
+                      requests:
+                        cpu: 200m
                     readinessProbe:
                       httpGet:
                         path: /actuator/health
@@ -92,4 +101,3 @@ phases:
 cache:
   paths:
     - '/root/.m2/**/*'
-#11121
